@@ -24,6 +24,10 @@ public class CameraRig : MonoBehaviour
     [SerializeField] float zoomSpeed = 0.01f;
     [SerializeField] bool smoothZoom = false;
     float minSmoothZoomStep = 0.001f;
+    float zoomStepSize = 0.01f;
+    [SerializeField] bool smoothRotate = false;
+    [SerializeField] float rotationStepSize = 0.01f;
+    float minSmoothRotateStep = (1f/128f) * (Mathf.PI/180f); // 1/4 degree
     [SerializeField] bool logarithmicZoom = false;
     [SerializeField] bool invertScroll = true;
 
@@ -33,7 +37,7 @@ public class CameraRig : MonoBehaviour
     #region - Built In Input Handling -
 
     private CameraInputHandler inputHandler;
-    [SerializeField] private float smoothZoomTarget = 0;
+    [SerializeField] private Vector3 smoothMovementDelta;
 
     private void Awake(){
         if (this.useBuiltInInput){
@@ -43,6 +47,13 @@ public class CameraRig : MonoBehaviour
             inputHandler.Camera.ZoomCamera.performed += OnCameraZoom;
             inputHandler.Camera.UnlockCursor.performed += OnUnlockCursor;
         }
+    }
+    public void EnableInput(){
+        this.OnEnable();
+    }
+
+    public void DisableInput(){
+        this.OnDisable();
     }
 
     private void OnEnable(){
@@ -56,40 +67,37 @@ public class CameraRig : MonoBehaviour
         }
     }
 
-    private void OnCameraZoom(InputAction.CallbackContext cc){
-        if (inputEnabled){
-            float Δ = cc.ReadValue<float>() * zoomSpeed;
-            if (invertScroll){
-                Δ = Δ * -1;
-            }
-            if (logarithmicZoom){
-                Δ = Δ * 0.15f * r;
-            }
-            if (smoothZoom){
-                smoothZoomTarget += Δ;                            // Update the target distance
-                Δ = 0.01f * smoothZoomTarget;                      // Take a step towards target point
-                if (Mathf.Abs(Δ) < minSmoothZoomStep){              // Check if step is smaller then the minimum step size
-                    if (Δ < 0){Δ = -minSmoothZoomStep;}             // Keep correct directionality (sign)
-                    else{Δ = minSmoothZoomStep;}
-                }
-                if (Mathf.Abs(Δ) > Mathf.Abs(smoothZoomTarget)){  // Check if step is larger then the remaining distance
-                    Δ = smoothZoomTarget;
-                    smoothZoomTarget = 0;
-                }
-                else {
-                    smoothZoomTarget -= Δ;                            // Remove the amount we are moving from the target
-                }
-                smoothZoomTarget -= Δ;                            // Remove the amount we are moving from the target
-            }
-            
+    private float FindStepSize(float distance, float baseStepSize, float minStepSize){
+        if (distance == 0) {return 0;}                  // If there is no distance to go return
+        float mag = Mathf.Abs(distance * baseStepSize); // Take a step towards target point
+        if (mag < Mathf.Abs(minStepSize)) { // Check if the step is smaller then the minimum step
+            mag = Mathf.Abs(minStepSize);
+            if (mag > Mathf.Abs(distance)){ // Check that step is not greater then remaining distance
+                Debug.Log("Using Remaining distance");
+                mag = Mathf.Abs(distance);
+            } 
+        }   
+        if ( distance < 0 ){ return mag * -1; } // Keep correct direction (sign)          
+        else{return mag;}
+    }
+
+    private void UpdateZoom(){
+        // This is for the built in user input
+        if (smoothZoom && smoothMovementDelta.x != 0){
+            float Δ = FindStepSize(smoothMovementDelta.x, zoomStepSize, minSmoothZoomStep);               
+            smoothMovementDelta.x -= Δ;  
             this.zoom(Δ);
         }
     }
-    private void OnCameraRotate(InputAction.CallbackContext cc){
-        if (inputEnabled){
-            Vector2 Δ = cc.ReadValue<Vector2>();
-            float Δphi = Δ.x * horizontalSpeed * Mathf.PI * -1;
-            float Δtheta = Δ.y * verticalSpeed * Mathf.PI;
+
+    private void UpdateRotation() {
+        if (smoothRotate && (smoothMovementDelta.y != 0 || smoothMovementDelta.z != 0)){
+            float Δphi = FindStepSize(smoothMovementDelta.y, rotationStepSize, minSmoothRotateStep);
+            float Δtheta = FindStepSize(smoothMovementDelta.z, rotationStepSize, minSmoothRotateStep);
+            smoothMovementDelta.y -= Δphi;
+            smoothMovementDelta.z -= Δtheta;
+            // Debug 
+            Debug.Log($"{smoothMovementDelta.y},{smoothMovementDelta.z}\n{Δphi},{Δtheta}");
             this.rotate(Δphi, Δtheta);
         }
     }
@@ -98,24 +106,38 @@ public class CameraRig : MonoBehaviour
         this.inputEnabled = !inputEnabled;
     }
 
-    void Update()
-    {
-        // This is for the built in user input
-        if (smoothZoom && smoothZoomTarget != 0){
-            float Δ = 0.01f * smoothZoomTarget;                // Take a step towards target point
-            if (Mathf.Abs(Δ) < minSmoothZoomStep){              // Check if step is smaller then the minimum step size
-                if (Δ < 0){Δ = -minSmoothZoomStep;}             // Keep correct directionality (sign)
-                else{Δ = minSmoothZoomStep;}
-            }
-            if (Mathf.Abs(Δ) > Mathf.Abs(smoothZoomTarget)){  // Check if step is larger then the remaining distance
-                Δ = smoothZoomTarget;
-                smoothZoomTarget = 0;
+    private void OnCameraZoom(InputAction.CallbackContext cc){
+        if (inputEnabled){
+            float Δ = cc.ReadValue<float>() * zoomSpeed;
+            if (invertScroll){ Δ = Δ * -1; }
+            if (logarithmicZoom){ Δ = Δ * 0.15f * r; }
+            if (smoothZoom){
+                smoothMovementDelta.x += Δ;
             }
             else {
-                smoothZoomTarget -= Δ;                            // Remove the amount we are moving from the target
+                this.zoom(Δ);
             }
-            this.zoom(Δ);
         }
+    }
+    private void OnCameraRotate(InputAction.CallbackContext cc){
+        if (inputEnabled){
+            Vector2 Δ = cc.ReadValue<Vector2>();
+            float Δphi = Δ.x * horizontalSpeed * Mathf.PI * -1;
+            float Δtheta = Δ.y * verticalSpeed * Mathf.PI;
+            if (smoothRotate){
+                smoothMovementDelta.y += Δphi;
+                smoothMovementDelta.z += Δtheta;
+            }
+            else {
+                this.rotate(Δphi, Δtheta);
+            }
+        }
+    }
+
+    void Update()
+    {
+        UpdateZoom();
+        UpdateRotation();
     }
 
     #endregion
@@ -192,12 +214,14 @@ public class CameraRigEditor : Editor {
     private SerializedProperty verticalSpeed;
     private SerializedProperty horizontalSpeed;
     private SerializedProperty zoomSpeed;
-    private SerializedProperty smoothZoom;
     private SerializedProperty logarithmicZoom;
+    private SerializedProperty smoothZoom;
+    private SerializedProperty smoothRotate;
     private SerializedProperty invertScroll;
 
     // Debug
-    private SerializedProperty smoothZoomTarget;
+    private SerializedProperty smoothMovementDelta;
+    private SerializedProperty rotationStepSize;
 
     #endregion
 
@@ -219,11 +243,13 @@ public class CameraRigEditor : Editor {
         verticalSpeed = soTarget.FindProperty("verticalSpeed");
         horizontalSpeed = soTarget.FindProperty("horizontalSpeed");
         zoomSpeed = soTarget.FindProperty("zoomSpeed");
-        smoothZoom = soTarget.FindProperty("smoothZoom");
         logarithmicZoom = soTarget.FindProperty("logarithmicZoom");
+        smoothZoom = soTarget.FindProperty("smoothZoom");
+        smoothRotate = soTarget.FindProperty("smoothRotate");
         invertScroll = soTarget.FindProperty("invertScroll");
 
-        smoothZoomTarget = soTarget.FindProperty("smoothZoomTarget");
+        smoothMovementDelta = soTarget.FindProperty("smoothMovementDelta");
+        rotationStepSize = soTarget.FindProperty("rotationStepSize");
     }
     public override void OnInspectorGUI()
     {
@@ -248,10 +274,12 @@ public class CameraRigEditor : Editor {
                 EditorGUILayout.PropertyField(verticalSpeed);
                 EditorGUILayout.PropertyField(horizontalSpeed);
                 EditorGUILayout.PropertyField(zoomSpeed);
-                EditorGUILayout.PropertyField(smoothZoom);
                 EditorGUILayout.PropertyField(logarithmicZoom);
+                EditorGUILayout.PropertyField(smoothZoom);
+                EditorGUILayout.PropertyField(smoothRotate);
                 EditorGUILayout.PropertyField(invertScroll);
-                //EditorGUILayout.PropertyField(smoothZoomTarget);
+                EditorGUILayout.PropertyField(smoothMovementDelta);
+                EditorGUILayout.PropertyField(rotationStepSize);
             break;;
         }
 
