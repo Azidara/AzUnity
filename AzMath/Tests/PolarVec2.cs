@@ -55,7 +55,6 @@ namespace AzMath {
         }
 
         // These all work but they aren't great implentations
-        
         public static PolarVec2 operator +(PolarVec2 v1, PolarVec2 v2){
             return PolarVec2.CartesianToPolar(PolarVec2.PolartoCartesian(v1) + PolarVec2.PolartoCartesian(v2));
         }
@@ -71,13 +70,14 @@ namespace AzMath {
         /*
         public static PolarVec2 operator +(PolarVec2 v1, PolarVec2 v2){
             PolarVec2 result = new PolarVec2();
-            // r = Sqrt(r1^2 + r2^2 + 2*r1*r2*cos(θ1 + 180 - θ2))
-            result.r = Mathf.Sqrt(Mathf.Pow(v1.r, 2) + Mathf.Pow(v2.r,2) + (2*v1.r*v2.r*Mathf.Cos(v2.θ - v1.θ)));
-            // θ = θ1 + arctan2(r2*sin(θ2 - θ1), r1 + r2*cos(θ2 - θ1))
-            result.θ = v1.θ + Mathf.Atan2(v2.r * Mathf.Sin(v2.θ - v1.θ), v1.r + v2.r*Mathf.Cos(v2.θ - v1.θ));
+            // r = Sqrt(r1^2 + r2^2 + 2*r1*r2*cos(θ))
+            result.r = Mathf.Sqrt(Mathf.Pow(v1.r, 2) + Mathf.Pow(v2.r,2) + (2*v1.r*v2.r*Mathf.Cos(v1.θ + 180 - v2.θ)));
+            // θ = θ1 + (180 - θ2)
+            result.θ = v1.θ + 
             return result;
         }
         */
+        
 
         // override object.Equals
         public override bool Equals(object obj)
