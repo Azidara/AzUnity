@@ -14,7 +14,7 @@ public class CameraRig : MonoBehaviour
     [SerializeField] public float minZoom = 1.001f;
     [SerializeField] public float maxZoom = 1000f;
     [SerializeField] float minPolarAngle = 0.001f;
-    [SerializeField] float maxPolarAngle = 180-0.001f;
+    [SerializeField] float maxPolarAngle = 180f-0.001f;
 
     // User Input Fields
     [SerializeField] private bool useBuiltInInput;
@@ -22,12 +22,13 @@ public class CameraRig : MonoBehaviour
     [SerializeField] float verticalSpeed = 0.002f;
     [SerializeField] float horizontalSpeed = 0.005f;
     [SerializeField] float zoomSpeed = 0.01f;
+    [SerializeField] private Vector3 smoothMovementDelta;
     [SerializeField] bool smoothZoom = false;
     float minSmoothZoomStep = 0.001f;
     float zoomStepSize = 0.01f;
     [SerializeField] bool smoothRotate = false;
     [SerializeField] float rotationStepSize = 0.01f;
-    float minSmoothRotateStep = (1f/128f) * (Mathf.PI/180f); // 1/4 degree
+    float minSmoothRotateStep = (1f/128f) * (Mathf.PI/180f); // 1/128 degree
     [SerializeField] bool logarithmicZoom = false;
     [SerializeField] bool invertScroll = true;
 
@@ -37,11 +38,12 @@ public class CameraRig : MonoBehaviour
     #region - Built In Input Handling -
 
     private CameraInputHandler inputHandler;
-    [SerializeField] private Vector3 smoothMovementDelta;
+    
 
     private void Awake(){
         if (this.useBuiltInInput){
             inputHandler = new CameraInputHandler();
+            Cursor.lockState = CursorLockMode.Locked;
 
             inputHandler.Camera.RotateCamera.performed += OnCameraRotate;
             inputHandler.Camera.ZoomCamera.performed += OnCameraZoom;
@@ -73,7 +75,6 @@ public class CameraRig : MonoBehaviour
         if (mag < Mathf.Abs(minStepSize)) { // Check if the step is smaller then the minimum step
             mag = Mathf.Abs(minStepSize);
             if (mag > Mathf.Abs(distance)){ // Check that step is not greater then remaining distance
-                Debug.Log("Using Remaining distance");
                 mag = Mathf.Abs(distance);
             } 
         }   
@@ -96,14 +97,18 @@ public class CameraRig : MonoBehaviour
             float Δtheta = FindStepSize(smoothMovementDelta.z, rotationStepSize, minSmoothRotateStep);
             smoothMovementDelta.y -= Δphi;
             smoothMovementDelta.z -= Δtheta;
-            // Debug 
-            Debug.Log($"{smoothMovementDelta.y},{smoothMovementDelta.z}\n{Δphi},{Δtheta}");
             this.rotate(Δphi, Δtheta);
         }
     }
 
     private void OnUnlockCursor(InputAction.CallbackContext cc){
         this.inputEnabled = !inputEnabled;
+        if (Cursor.lockState != CursorLockMode.Locked){
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+        else {
+            Cursor.lockState = CursorLockMode.None;
+        }
     }
 
     private void OnCameraZoom(InputAction.CallbackContext cc){
@@ -149,7 +154,7 @@ public class CameraRig : MonoBehaviour
         r = initpos.x;
         φ = initpos.y;
         θ = initpos.z;
-        this.transform.LookAt(target);
+        this.updatePosition();
     }
 
     public void zoom(float Δ){
