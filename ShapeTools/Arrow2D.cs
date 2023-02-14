@@ -6,17 +6,19 @@ using UnityEngine;
 [RequireComponent(typeof(MeshRenderer))]
 public class Arrow2D : MonoBehaviour
 {
-    [SerializeField] private float _stemLength = 2;
+    [SerializeField] private float _stemLength = 0.8f;
     [SerializeField] private float _stemWidth = 0.1f;
-    [SerializeField] private float _pointLength = 0.5f;
-    [SerializeField] private float _pointWidth = 0.5f;
+    [SerializeField] private float _pointLength = 0.2f;
+    [SerializeField] private float _pointWidth = 0.2f;
     [SerializeField] private Color _color = Color.white;
+    [SerializeField] private Vector3 _target;
 
     public float stemLength {get{return _stemLength;} set{_stemLength = value; this.MakeArrowMesh();}}
     public float stemWidth {get{return _stemWidth;} set{_stemWidth = value; this.MakeArrowMesh();}}
     public float pointLength {get{return _pointLength;} set{_pointLength = value; this.MakeArrowMesh();}}
     public float pointWidth {get{return _pointWidth;} set{_pointWidth = value; this.MakeArrowMesh();}}
     public Color color {get{return _color;} set{_color = value; this.UpdateColor();}}
+    public Vector3 target {get{return _target;} set{_target = value; this.UpdateOrientation();}}
 
     [System.NonSerialized]
     public List<Vector3> vertices;
@@ -27,10 +29,19 @@ public class Arrow2D : MonoBehaviour
 
     void Awake(){
         mesh = new Mesh();
-        this.GetComponent<MeshFilter>().mesh = mesh;
+        this.GetComponent<MeshFilter>().mesh = mesh; 
 
         MakeArrowMesh();
         UpdateColor();
+    }
+
+    void UpdateOrientation(){
+        if (target != null){
+            this.transform.LookAt(this.transform.position + new Vector3(target.x,0,target.z));
+            float mag = target.magnitude;
+            this.transform.localScale = new Vector3(mag,1,mag);
+        }
+        
     }
 
     void UpdateColor(){
@@ -49,10 +60,10 @@ public class Arrow2D : MonoBehaviour
         Vector3 stemOrigin = Vector3.zero;
         float steamHalfWidth = _stemWidth/2f;
 
-        vertices.Add(stemOrigin+(steamHalfWidth*Vector3.down));
-        vertices.Add(stemOrigin+(steamHalfWidth*Vector3.up));
-        vertices.Add(vertices[0]+(_stemLength*Vector3.right));
-        vertices.Add(vertices[1]+(_stemLength*Vector3.right));
+        vertices.Add(stemOrigin+(steamHalfWidth*Vector3.right));
+        vertices.Add(stemOrigin+(steamHalfWidth*Vector3.left));
+        vertices.Add(vertices[0]+(_stemLength*Vector3.forward));
+        vertices.Add(vertices[1]+(_stemLength*Vector3.forward));
 
         triangles.Add(0);
         triangles.Add(1);
@@ -70,12 +81,12 @@ public class Arrow2D : MonoBehaviour
         triangles.Add(3);
         triangles.Add(0);
 
-        Vector3 tipOrigin = _stemLength*Vector3.right;
+        Vector3 tipOrigin = _stemLength*Vector3.forward;
         float tipHalfWidth = _pointWidth/2;
 
-        vertices.Add(tipOrigin+(tipHalfWidth*Vector3.up));
-        vertices.Add(tipOrigin+(tipHalfWidth*Vector3.down));
-        vertices.Add(tipOrigin+(_pointLength*Vector3.right));
+        vertices.Add(tipOrigin+(tipHalfWidth*Vector3.right));
+        vertices.Add(tipOrigin+(tipHalfWidth*Vector3.left));
+        vertices.Add(tipOrigin+(_pointLength*Vector3.forward));
 
         triangles.Add(4);
         triangles.Add(6);
@@ -95,5 +106,6 @@ public class Arrow2D : MonoBehaviour
     void OnValidate(){
         this.MakeArrowMesh();
         this.UpdateColor();
+        this.UpdateOrientation();
     }
 }
