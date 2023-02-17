@@ -1,8 +1,8 @@
 {
-    "name": "BasicPlayerInputHandler",
+    "name": "PlayerInputActions",
     "maps": [
         {
-            "name": "BasicPlayer",
+            "name": "Player",
             "id": "f5154c14-e8cc-41de-b16d-83f51de32eab",
             "actions": [
                 {

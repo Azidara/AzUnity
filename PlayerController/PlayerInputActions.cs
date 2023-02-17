@@ -24,7 +24,7 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
     ""name"": ""PlayerInputActions"",
     ""maps"": [
         {
-            ""name"": ""BasicPlayer"",
+            ""name"": ""Player"",
             ""id"": ""f5154c14-e8cc-41de-b16d-83f51de32eab"",
             ""actions"": [
                 {
@@ -352,14 +352,14 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
         }
     ]
 }");
-        // BasicPlayer
-        m_BasicPlayer = asset.FindActionMap("BasicPlayer", throwIfNotFound: true);
-        m_BasicPlayer_Move = m_BasicPlayer.FindAction("Move", throwIfNotFound: true);
-        m_BasicPlayer_Jump = m_BasicPlayer.FindAction("Jump", throwIfNotFound: true);
-        m_BasicPlayer_Sprint = m_BasicPlayer.FindAction("Sprint", throwIfNotFound: true);
-        m_BasicPlayer_Crouch = m_BasicPlayer.FindAction("Crouch", throwIfNotFound: true);
-        m_BasicPlayer_Respawn = m_BasicPlayer.FindAction("Respawn", throwIfNotFound: true);
-        m_BasicPlayer_SetRespawn = m_BasicPlayer.FindAction("SetRespawn", throwIfNotFound: true);
+        // Player
+        m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
+        m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
+        m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
+        m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
+        m_Player_Crouch = m_Player.FindAction("Crouch", throwIfNotFound: true);
+        m_Player_Respawn = m_Player.FindAction("Respawn", throwIfNotFound: true);
+        m_Player_SetRespawn = m_Player.FindAction("SetRespawn", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -416,54 +416,54 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
         return asset.FindBinding(bindingMask, out action);
     }
 
-    // BasicPlayer
-    private readonly InputActionMap m_BasicPlayer;
-    private IBasicPlayerActions m_BasicPlayerActionsCallbackInterface;
-    private readonly InputAction m_BasicPlayer_Move;
-    private readonly InputAction m_BasicPlayer_Jump;
-    private readonly InputAction m_BasicPlayer_Sprint;
-    private readonly InputAction m_BasicPlayer_Crouch;
-    private readonly InputAction m_BasicPlayer_Respawn;
-    private readonly InputAction m_BasicPlayer_SetRespawn;
-    public struct BasicPlayerActions
+    // Player
+    private readonly InputActionMap m_Player;
+    private IPlayerActions m_PlayerActionsCallbackInterface;
+    private readonly InputAction m_Player_Move;
+    private readonly InputAction m_Player_Jump;
+    private readonly InputAction m_Player_Sprint;
+    private readonly InputAction m_Player_Crouch;
+    private readonly InputAction m_Player_Respawn;
+    private readonly InputAction m_Player_SetRespawn;
+    public struct PlayerActions
     {
         private @PlayerInputActions m_Wrapper;
-        public BasicPlayerActions(@PlayerInputActions wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Move => m_Wrapper.m_BasicPlayer_Move;
-        public InputAction @Jump => m_Wrapper.m_BasicPlayer_Jump;
-        public InputAction @Sprint => m_Wrapper.m_BasicPlayer_Sprint;
-        public InputAction @Crouch => m_Wrapper.m_BasicPlayer_Crouch;
-        public InputAction @Respawn => m_Wrapper.m_BasicPlayer_Respawn;
-        public InputAction @SetRespawn => m_Wrapper.m_BasicPlayer_SetRespawn;
-        public InputActionMap Get() { return m_Wrapper.m_BasicPlayer; }
+        public PlayerActions(@PlayerInputActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Move => m_Wrapper.m_Player_Move;
+        public InputAction @Jump => m_Wrapper.m_Player_Jump;
+        public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
+        public InputAction @Crouch => m_Wrapper.m_Player_Crouch;
+        public InputAction @Respawn => m_Wrapper.m_Player_Respawn;
+        public InputAction @SetRespawn => m_Wrapper.m_Player_SetRespawn;
+        public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
         public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(BasicPlayerActions set) { return set.Get(); }
-        public void SetCallbacks(IBasicPlayerActions instance)
+        public static implicit operator InputActionMap(PlayerActions set) { return set.Get(); }
+        public void SetCallbacks(IPlayerActions instance)
         {
-            if (m_Wrapper.m_BasicPlayerActionsCallbackInterface != null)
+            if (m_Wrapper.m_PlayerActionsCallbackInterface != null)
             {
-                @Move.started -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnMove;
-                @Move.performed -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnMove;
-                @Move.canceled -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnMove;
-                @Jump.started -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnJump;
-                @Jump.performed -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnJump;
-                @Jump.canceled -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnJump;
-                @Sprint.started -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnSprint;
-                @Sprint.performed -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnSprint;
-                @Sprint.canceled -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnSprint;
-                @Crouch.started -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnCrouch;
-                @Crouch.performed -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnCrouch;
-                @Crouch.canceled -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnCrouch;
-                @Respawn.started -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnRespawn;
-                @Respawn.performed -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnRespawn;
-                @Respawn.canceled -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnRespawn;
-                @SetRespawn.started -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnSetRespawn;
-                @SetRespawn.performed -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnSetRespawn;
-                @SetRespawn.canceled -= m_Wrapper.m_BasicPlayerActionsCallbackInterface.OnSetRespawn;
+                @Move.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMove;
+                @Move.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMove;
+                @Move.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMove;
+                @Jump.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnJump;
+                @Jump.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnJump;
+                @Jump.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnJump;
+                @Sprint.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSprint;
+                @Sprint.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSprint;
+                @Sprint.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSprint;
+                @Crouch.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrouch;
+                @Crouch.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrouch;
+                @Crouch.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrouch;
+                @Respawn.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRespawn;
+                @Respawn.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRespawn;
+                @Respawn.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRespawn;
+                @SetRespawn.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSetRespawn;
+                @SetRespawn.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSetRespawn;
+                @SetRespawn.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSetRespawn;
             }
-            m_Wrapper.m_BasicPlayerActionsCallbackInterface = instance;
+            m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
             {
                 @Move.started += instance.OnMove;
@@ -487,7 +487,7 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
             }
         }
     }
-    public BasicPlayerActions @BasicPlayer => new BasicPlayerActions(this);
+    public PlayerActions @Player => new PlayerActions(this);
     private int m_KeyboardSchemeIndex = -1;
     public InputControlScheme KeyboardScheme
     {
@@ -506,7 +506,7 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
             return asset.controlSchemes[m_GamepadSchemeIndex];
         }
     }
-    public interface IBasicPlayerActions
+    public interface IPlayerActions
     {
         void OnMove(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
